@@ -101,16 +101,18 @@
       }
     });
     
-    
+    //socket ki posluša dregljaje
     socket.on('dregljaj', function(receiver){
       console.log("Client-receiver: dregljaj je prispel\n---"+receiver.dregljaj);
-      
+      //inicializacija jrumble nad selektorjem vsebina
       $('vsebina').jrumble({
           x: 10,
           y: 10,
           rotation: 4
       });
+      //zacetek tresenja
       $('vsebina').trigger('startRumble');
+      //po 5 sekundah se tresenje konča
       setTimeout(function(){
         console.log("JRUMBLE se je zdaj ustavil");
         $('vsebina').trigger('stopRumble');

@@ -43,6 +43,7 @@ Klepet.prototype.procesirajUkaz = function(ukaz) {
         sporocilo = 'Neznan ukaz';
       }
       break;
+      //procesiranje ukaza /dregljaj
     case 'dregljaj':
       besede.shift();
       var destination = besede.join(" ");
@@ -50,6 +51,7 @@ Klepet.prototype.procesirajUkaz = function(ukaz) {
         var receiver = {
           vzdevek: destination
         };
+        //na socket pošlje objekt receiver z atributom vzdevek prejemnika
         this.socket.emit('dregljaj', receiver); 
         console.log("Client-sender: dregljaj poslan to:\n---"+receiver.vzdevek);
         sporocilo = 'Dregljaj za '+destination;
