@@ -10,36 +10,63 @@
     function divElementDodajSliko(link) {
     	return $('<div></div>').html('<img src="' + link + '" width="200" hspace="20">');
     }
+
     
     function divElementHtmlTekst(sporocilo) {
       return $('<div></div>').html('<i>' + sporocilo + '</i>');
     }
+    
+    function jeSlika(sporocilo){
+      if ((sporocilo.startsWith('http://') || sporocilo.startsWith('https://'))
+    			&& (sporocilo.endsWith('jpg') || sporocilo.endsWith('png') || sporocilo.endsWith('gif') )){
+    			  return true;
+    			}
+    			return false;
+    }
+    
+    function obdelajSporocilo(sporocilo){
+      
+
+      var array = sporocilo.split(" ");
+      var arraySlik = [];
+      console.log("sporocilo: "+sporocilo);
+      for(var i = 0; i < array.length; i++){
+        if(jeSlika(array[i])){
+          console.log("to je slika: "+array[i]);
+          arraySlik[arraySlik.length] = array[i];
+        }  
+      }
+      $('#sporocila').append(divElementEnostavniTekst(sporocilo));
+      $('#sporocila').scrollTop($('#sporocila').prop('scrollHeight'));
+      
+      if(arraySlik){
+        for(var k = 0; k < arraySlik.length; k++){
+        	$('#sporocila').append(divElementDodajSliko(arraySlik[k]));
+      		$('#sporocila').scrollTop($('#sporocila').prop('scrollHeight'));
+        }
+      }
+      
+    }
+    
     
     function procesirajVnosUporabnika(klepetApp, socket) {
       var sporocilo = $('#poslji-sporocilo').val();
       sporocilo = dodajSmeske(sporocilo);
       var sistemskoSporocilo;
       
-      if ((sporocilo.startsWith('http://') || sporocilo.startsWith('https://'))
-    			&& (sporocilo.endsWith('jpg') || sporocilo.endsWith('png') || sporocilo.endsWith('gif') )) {
-    		klepetApp.posljiSporocilo(trenutniKanal, sporocilo);
-    		$('#sporocila').append(divElementDodajSliko(sporocilo));
-    		$('#sporocila').scrollTop($('#sporocila').prop('scrollHeight'));
-    	} else {
-    
       if (sporocilo.charAt(0) == '/') {
         sistemskoSporocilo = klepetApp.procesirajUkaz(sporocilo);
         if (sistemskoSporocilo) {
           $('#sporocila').append(divElementHtmlTekst(sistemskoSporocilo));
         }
-      } else {
-        sporocilo = filtirirajVulgarneBesede(sporocilo);
-        klepetApp.posljiSporocilo(trenutniKanal, sporocilo);
-        $('#sporocila').append(divElementEnostavniTekst(sporocilo));
-        $('#sporocila').scrollTop($('#sporocila').prop('scrollHeight'));
+        return;
       }
-    	}
-    
+      
+      sporocilo = filtirirajVulgarneBesede(sporocilo);
+      klepetApp.posljiSporocilo(trenutniKanal, sporocilo);
+      
+      obdelajSporocilo(sporocilo);
+
       $('#poslji-sporocilo').val('');
     }
     
@@ -85,17 +112,9 @@
       });
     
       socket.on('sporocilo', function (sporocilo) {
-        var image = "";
         var strBesedilo = sporocilo.besedilo;
-        var arr = strBesedilo.split(": ");
-        if(arr.length >= 2 && (strBesedilo.endsWith('jpg') || strBesedilo.endsWith('gif') || strBesedilo.endsWith('png'))){
-          image = divElementDodajSliko(arr[1]);
-          $('#sporocila').append(arr[0]+":");
-          $('#sporocila').append(image);
-        } else{
-          var novElement = divElementEnostavniTekst(strBesedilo);
-          $('#sporocila').append(novElement);
-        }
+        obdelajSporocilo(strBesedilo);
+        
         
         
         /*try{
