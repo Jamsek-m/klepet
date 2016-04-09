@@ -72,7 +72,7 @@
       $('#kanal').text(trenutniVzdevek + " @ " + trenutniKanal);
       $('#sporocila').append(divElementHtmlTekst('Sprememba kanala.'));
     });
-  });
+
 
   socket.on('uporabniki', function(uporabniki) {
     $('#seznam-uporabnikov').empty();
