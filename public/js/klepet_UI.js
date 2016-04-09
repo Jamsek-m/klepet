@@ -8,9 +8,13 @@
       }
     }
     function divElementDodajSliko(link) {
-    	return $('<div></div>').html('<img src="' + link + '" width="200" hspace="20">');
+      return $('<div></div>').html('<img src="' + link + '" width="200" hspace="20">');
     }
 
+    function divElementDodajYoutube(sporocilo){
+      var identifikator = sporocilo.split("?v=")[1];
+      return $('<div></div>').html('<iframe width="200" height="150" style="PADDING-LEFT: 20px" src="https://www.youtube.com/embed/' + identifikator + '" frameborder="0" allowfullscreen></iframe>');
+    }
     
     function divElementHtmlTekst(sporocilo) {
       return $('<div></div>').html('<i>' + sporocilo + '</i>');
@@ -18,22 +22,30 @@
     
     function jeSlika(sporocilo){
       if ((sporocilo.startsWith('http://') || sporocilo.startsWith('https://'))
-    			&& (sporocilo.endsWith('jpg') || sporocilo.endsWith('png') || sporocilo.endsWith('gif') )){
-    			  return true;
-    			}
-    			return false;
+          && (sporocilo.endsWith('jpg') || sporocilo.endsWith('png') || sporocilo.endsWith('gif') )){
+            return true;
+          }
+          return false;
+    }
+
+	  function isMovie(sporocilo){
+        if(sporocilo.startsWith("https://www.youtube.com/watch?v=")) return true;
+        return false;
     }
     
     function obdelajSporocilo(sporocilo){
-      
-
       var array = sporocilo.split(" ");
       var arraySlik = [];
+	    var arrayMovie = [];
       console.log("sporocilo: "+sporocilo);
       for(var i = 0; i < array.length; i++){
         if(jeSlika(array[i])){
           console.log("to je slika: "+array[i]);
           arraySlik[arraySlik.length] = array[i];
+        }
+        if(isMovie(array[i])){
+          console.log("to je movie: "+array[i]);
+          arrayMovie[arrayMovie.length] = array[i];
         }  
       }
       $('#sporocila').append(divElementEnostavniTekst(sporocilo));
@@ -41,7 +53,14 @@
       
       if(arraySlik){
         for(var k = 0; k < arraySlik.length; k++){
-        	$('#sporocila').append(divElementDodajSliko(arraySlik[k]));
+          $('#sporocila').append(divElementDodajSliko(arraySlik[k]));
+          $('#sporocila').scrollTop($('#sporocila').prop('scrollHeight'));
+        }
+      }
+
+      if(arrayMovie){
+        for(var k = 0; k < arrayMovie.length; k++){
+        	$('#sporocila').append(divElementDodajYoutube(arrayMovie[k]));
       		$('#sporocila').scrollTop($('#sporocila').prop('scrollHeight'));
         }
       }
@@ -116,10 +135,6 @@
         var strBesedilo = sporocilo.besedilo;
         obdelajSporocilo(strBesedilo);
         
-        
-        
-        
-        
       });
       
     socket.on('kanali', function(kanali) {
@@ -139,30 +154,30 @@
     });
     
     socket.on('uporabniki', function(uporabniki) {
-    	$('#seznam-uporabnikov').empty();
+      $('#seznam-uporabnikov').empty();
     
-    	for (var i=0; i < uporabniki.length; i++) {
-      		$('#seznam-uporabnikov').append(divElementEnostavniTekst(uporabniki[i]));
-    	}
-      		$('#seznam-uporabnikov div').click(function(){
-    			$('#poslji-sporocilo').attr('value',('/zasebno "'+ $(this).text()+'" '));
-    			$('#poslji-sporocilo').focus();
-    		});
-  	});
+      for (var i=0; i < uporabniki.length; i++) {
+          $('#seznam-uporabnikov').append(divElementEnostavniTekst(uporabniki[i]));
+      }
+          $('#seznam-uporabnikov div').click(function(){
+          $('#poslji-sporocilo').attr('value',('/zasebno "'+ $(this).text()+'" '));
+          $('#poslji-sporocilo').focus();
+        });
+    });
 
-		socket.on('dregljaj', function(receiver){
-      		console.log("Client-receiver: dregljaj je prispel\n---"+receiver.dregljaj);
-	      //inicializacija jrumble nad selektorjem vsebina
-	      $('#vsebina').jrumble();
-	      //zacetek tresenja
-	      $('#vsebina').trigger('startRumble');
-	      //po 5 sekundah se tresenje konèa
-	      setTimeout(function(){
-	        console.log("JRUMBLE se je zdaj ustavil");
-	        $('#vsebina').trigger('stopRumble');
-	      }, 1500);
-	      
-	    });
+    socket.on('dregljaj', function(receiver){
+          console.log("Client-receiver: dregljaj je prispel\n---"+receiver.dregljaj);
+        //inicializacija jrumble nad selektorjem vsebina
+        $('#vsebina').jrumble();
+        //zacetek tresenja
+        $('#vsebina').trigger('startRumble');
+        //po 5 sekundah se tresenje konèa
+        setTimeout(function(){
+          console.log("JRUMBLE se je zdaj ustavil");
+          $('#vsebina').trigger('stopRumble');
+        }, 1500);
+        
+      });
     
       setInterval(function() {
         socket.emit('kanali');
